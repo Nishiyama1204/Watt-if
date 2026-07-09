@@ -111,7 +111,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ padding: "1.5rem", fontFamily: "sans-serif", maxWidth: 780 }}>
+    <div style={{ padding: "1.5rem", fontFamily: "sans-serif", maxWidth: 780, margin: "0 auto" }}>
 
       {/* タイトル */}
       <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 4 }}>
