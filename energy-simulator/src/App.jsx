@@ -27,20 +27,23 @@ const PRESETS = {
 
 // モード・シナリオ定義
 const MODES = {
-  normal:  { label:"🌤️ 通常モード",  desc:"季節別の代表的な日で需給を確認" },
-  extreme: { label:"🌡️ 猛暑日モード", desc:"実データで記録的な猛暑日の需給を検証" },
+  normal:  { label:"🌤️ 通常モード",      desc:"春・梅雨・秋の代表日で需給を確認" },
+  summer:  { label:"🌡️ 夏・電力逼迫日",  desc:"記録的猛暑日の実データで検証" },
+  winter:  { label:"❄️ 冬・電力逼迫日",  desc:"厳冬期の電力逼迫日の実データで検証" },
 };
 
 const SCENARIO_OPTIONS = {
   normal: [
-    { key:"spring", label:"春（4/1）",   note:"実データ・ピーク需要43,538MW・太陽光は低め" },
-    { key:"rainy",  label:"梅雨（6/17）", note:"実データ・ピーク需要48,086MW・太陽光良好" },
-    { key:"autumn", label:"秋（10/6）",   note:"実データ・ピーク需要39,150MW・年間最低水準" },
-    { key:"winter", label:"冬（2/9）",    note:"実データ・ピーク需要50,703MW・朝夕2回ピーク" },
+    { key:"spring", label:"春（4/1）",   note:"実データ・ピーク43,538MW・太陽光は低め" },
+    { key:"rainy",  label:"梅雨（6/17）", note:"実データ・ピーク48,086MW・太陽光良好" },
+    { key:"autumn", label:"秋（10/6）",   note:"実データ・ピーク39,150MW・年間最低水準" },
   ],
-  extreme: [
+  summer: [
     { key:"aug30", label:"最高気温日（8/30, 38.4℃）", note:"実データ・東京記録的猛暑・需要47,315MW" },
     { key:"aug6",  label:"需要最大日（8/6）",           note:"実データ・夏の需要ピーク・57,669MW" },
+  ],
+  winter: [
+    { key:"winter", label:"最大逼迫日（2/9）", note:"実データ・ピーク50,703MW・朝夕2回ピーク" },
   ],
 };
 
@@ -403,7 +406,8 @@ export default function App() {
   // モード変更時はシナリオをリセット
   function handleMode(m) {
     setMode(m);
-    setScenario(m === "normal" ? "spring" : "aug30");
+    const defaults = { normal:"spring", summer:"aug30", winter:"winter" };
+    setScenario(defaults[m]);
     setPlaying(false);
     setFrameIdx(0);
   }
