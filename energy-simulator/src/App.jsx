@@ -30,6 +30,7 @@ const MODES = {
   normal:  { label:"🌤️ 通常モード",      desc:"春・梅雨・秋の代表日で需給を確認" },
   summer:  { label:"🌡️ 夏・電力逼迫日",  desc:"記録的猛暑日の実データで検証" },
   winter:  { label:"❄️ 冬・電力逼迫日",  desc:"厳冬期の電力逼迫日の実データで検証" },
+  predict: { label:"🔮 未来予測",         desc:"気温を入力して需要と安定性を予測" },
 };
 
 const SCENARIO_OPTIONS = {
@@ -353,6 +354,23 @@ const SCENARIO_DATA = {
   ],
 };
 
+// 未来予測用回帰係数
+// 出典：analysis_v2.py で関東8地点気温×需給データから算出
+// 予測需要(MW) = SLOPE × |気温 - COMFORT_TEMP| + INTERCEPT
+const REGRESSION = {
+  slope:        424.0,
+  intercept:    28391,
+  comfort_temp: 22.0,
+};
+
+// 季節ごとの代表的な太陽光・風力係数（ピーク時推定）
+const SEASON_FACTORS = {
+  spring: { solarFactor: 0.28, windFactor: 0.035, label: "春（3〜5月）" },
+  summer: { solarFactor: 0.25, windFactor: 0.002, label: "夏（6〜9月）" },
+  autumn: { solarFactor: 0.25, windFactor: 0.045, label: "秋（10〜11月）" },
+  winter: { solarFactor: 0.10, windFactor: 0.008, label: "冬（12〜2月）" },
+};
+
 // ============================================================
 // 計算ロジック
 // ============================================================
@@ -398,9 +416,12 @@ export default function App() {
   const [mode,       setMode]       = useState("normal");
   const [scenarioKey,setScenario]   = useState("spring");
   const [mix,        setMix]        = useState({ ...PRESETS.current });
-  const [view,       setView]       = useState("sim");     // "sim" | "curve"
+  const [view,       setView]       = useState("sim");
   const [playing,    setPlaying]    = useState(false);
   const [frameIdx,   setFrameIdx]   = useState(0);
+  // 未来予測モード用
+  const [predTemp,   setPredTemp]   = useState("30");
+  const [predSeason, setPredSeason] = useState("summer");
   const timerRef = useRef(null);
 
   // モード変更時はシナリオをリセット
@@ -522,19 +543,21 @@ export default function App() {
         ))}
       </div>
 
-      {/* ② シナリオ選択 */}
-      <div style={{ marginBottom:14 }}>
-        <span style={{ fontSize:12, color:"#888", marginRight:10 }}>シナリオ</span>
-        {SCENARIO_OPTIONS[mode].map(sc => (
-          <button key={sc.key} onClick={() => { setScenario(sc.key); setPlaying(false); setFrameIdx(0); }}
-            style={{ ...S.smallTag(scenarioKey===sc.key), marginRight:6, marginBottom:4 }}>
-            {sc.label}
-          </button>
-        ))}
-        <span style={{ fontSize:11, color:"#aaa", marginLeft:6 }}>
-          {SCENARIO_OPTIONS[mode].find(s=>s.key===scenarioKey)?.note}
-        </span>
-      </div>
+      {/* ② シナリオ選択（未来予測モード以外） */}
+      {mode !== "predict" && (
+        <div style={{ marginBottom:14 }}>
+          <span style={{ fontSize:12, color:"#888", marginRight:10 }}>シナリオ</span>
+          {SCENARIO_OPTIONS[mode].map(sc => (
+            <button key={sc.key} onClick={() => { setScenario(sc.key); setPlaying(false); setFrameIdx(0); }}
+              style={{ ...S.smallTag(scenarioKey===sc.key), marginRight:6, marginBottom:4 }}>
+              {sc.label}
+            </button>
+          ))}
+          <span style={{ fontSize:11, color:"#aaa", marginLeft:6 }}>
+            {SCENARIO_OPTIONS[mode].find(s=>s.key===scenarioKey)?.note}
+          </span>
+        </div>
+      )}
 
       {/* ③ プリセット */}
       <div style={{ marginBottom:14 }}>
@@ -550,14 +573,75 @@ export default function App() {
         ))}
       </div>
 
-      {/* ④ ビュー選択 */}
-      <div style={{ marginBottom:20 }}>
-        <span style={{ fontSize:12, color:"#888", marginRight:10 }}>表示</span>
-        {[{key:"sim",label:"⚡ シミュレーター"},{key:"curve",label:"📈 需給カーブ"}].map(v => (
-          <button key={v.key} onClick={() => setView(v.key)}
-            style={{ ...S.tag(view===v.key), marginRight:8 }}>{v.label}</button>
-        ))}
-      </div>
+      {/* ④ プリセット後のスペーサー */}
+      <div style={{ marginBottom:20 }} />
+
+      {/* 未来予測モード：気温入力パネル */}
+      {mode === "predict" && (() => {
+        const tempVal   = parseFloat(predTemp) || 22;
+        const discomfort = Math.abs(tempVal - REGRESSION.comfort_temp);
+        const predDemand = Math.round(REGRESSION.slope * discomfort + REGRESSION.intercept);
+        const sf = SEASON_FACTORS[predSeason].solarFactor;
+        const wf = SEASON_FACTORS[predSeason].windFactor;
+        const pm = calcMetrics(mix, predDemand, sf, wf);
+
+        return (
+          <div style={{ marginBottom:24 }}>
+            {/* 入力エリア */}
+            <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:20,
+              background:"#f5f5f3", borderRadius:8, padding:"16px 20px" }}>
+              <div>
+                <div style={{ fontSize:12, color:"#888", marginBottom:6 }}>予想気温（℃）を入力</div>
+                <input
+                  type="number" min="-10" max="45" step="0.5"
+                  value={predTemp}
+                  onChange={e => setPredTemp(e.target.value)}
+                  style={{ fontSize:28, fontWeight:500, width:100, border:"none",
+                    borderBottom:"2px solid #1a1a1a", background:"transparent",
+                    outline:"none", textAlign:"center" }}
+                />
+                <span style={{ fontSize:16, marginLeft:4 }}>℃</span>
+              </div>
+              <div>
+                <div style={{ fontSize:12, color:"#888", marginBottom:6 }}>季節</div>
+                <div style={{ display:"flex", gap:6 }}>
+                  {Object.entries(SEASON_FACTORS).map(([k, v]) => (
+                    <button key={k} onClick={() => setPredSeason(k)}
+                      style={{ ...S.smallTag(predSeason===k), padding:"4px 10px" }}>
+                      {v.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginLeft:"auto", textAlign:"right" }}>
+                <div style={{ fontSize:12, color:"#888", marginBottom:4 }}>予測需要</div>
+                <div style={{ fontSize:28, fontWeight:500 }}>{predDemand.toLocaleString()}</div>
+                <div style={{ fontSize:12, color:"#888" }}>MW</div>
+              </div>
+            </div>
+
+            {/* 3指標 */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:16 }}>
+              <MetricCard label="予測CO2排出量" value={pm.co2} unit="t-CO2/h"
+                barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
+              <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
+                barColor="#eda100" barPct={Math.min((pm.cost/18)*100,100)} />
+              <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>予測安定性</div>
+                <div style={{ fontSize:14, fontWeight:500, color:pm.stabilityColor }}>{pm.stabilityLabel}</div>
+                <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {pm.reserve}%</div>
+              </div>
+            </div>
+
+            {/* 注記 */}
+            <div style={{ fontSize:11, color:"#aaa", lineHeight:1.6 }}>
+              予測式：需要(MW) = 424 × |気温 − 22℃| + 28,391<br/>
+              出典：関東8地点気温×OCCTO需給実績（2025/4〜2026/3）による回帰分析<br/>
+              ※曜日・湿度・前日比などは考慮していないため誤差が生じます
+            </div>
+          </div>
+        );
+      })()}
 
       {/* メインエリア：スライダー + コンテンツ */}
       <div style={{ display:"flex", gap:28 }}>
@@ -589,11 +673,11 @@ export default function App() {
         {/* コンテンツエリア */}
         <div style={{ flex:1, minWidth:0 }}>
 
-          {/* ===== シミュレータービュー ===== */}
-          {view === "sim" && (
+          {/* ===== 通常・夏・冬モード：3指標 + 需給カーブ同時表示 ===== */}
+          {mode !== "predict" && (
             <>
-              {/* 指標カード */}
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:20 }}>
+              {/* 3指標カード */}
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:16 }}>
                 <MetricCard label="CO2排出量" value={snapMetrics.co2} unit="t-CO2/h"
                   barColor="#E24B4A" barPct={Math.min((snapMetrics.co2/35)*100,100)} />
                 <MetricCard label="発電コスト" value={snapMetrics.cost} unit="億円/h"
@@ -607,46 +691,16 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 横棒グラフ（全ラベル表示） */}
-              <div style={{ fontSize:12, color:"#888", marginBottom:6 }}>電源構成の内訳</div>
-              <ResponsiveContainer width="100%" height={210}>
-                <BarChart
-                  data={SOURCES.map(s => ({
-                    name: s.label,
-                    value: Math.round(snapMetrics.norm[s.key] * 10) / 10,
-                    color: s.color,
-                  }))}
-                  layout="vertical"
-                  margin={{ left:80, right:40, top:4, bottom:4 }}
-                >
-                  <XAxis type="number" domain={[0,100]} tickFormatter={v=>`${v}%`} tick={{ fontSize:11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize:11 }} width={80} />
-                  <Tooltip formatter={v=>[`${v}%`, "割合"]} />
-                  <Bar dataKey="value" radius={[0,4,4,0]} label={{ position:"right", fontSize:11, formatter:v=>`${v}%` }}>
-                    {SOURCES.map((s,i) => <Cell key={i} fill={s.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-
-              <p style={{ fontSize:11, color:"#aaa", marginTop:8 }}>
-                ※ピーク需要時（{peakRow.time}・{peakDemand.toLocaleString()} MW）の試算
-              </p>
-            </>
-          )}
-
-          {/* ===== 需給カーブビュー ===== */}
-          {view === "curve" && (
-            <>
-              {/* 再生コントロール */}
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+              {/* 需給カーブ：再生コントロール */}
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
                 <button onClick={() => { if(frameIdx>=scenarioData.length-1)setFrameIdx(0); setPlaying(true); }}
                   disabled={playing}
-                  style={{ padding:"6px 14px", fontSize:13, borderRadius:6, border:"none",
+                  style={{ padding:"5px 14px", fontSize:12, borderRadius:6, border:"none",
                     background:playing?"#ccc":"#1a1a1a", color:"#fff", cursor:playing?"default":"pointer" }}>
                   ▶ 再生
                 </button>
                 <button onClick={() => { setPlaying(false); setFrameIdx(0); }}
-                  style={{ padding:"6px 12px", fontSize:13, borderRadius:6, border:"0.5px solid #ccc",
+                  style={{ padding:"5px 12px", fontSize:12, borderRadius:6, border:"0.5px solid #ccc",
                     background:"transparent", color:"#555", cursor:"pointer" }}>
                   ↺ リセット
                 </button>
@@ -655,24 +709,24 @@ export default function App() {
                   style={{ flex:1 }} />
               </div>
 
-              {/* グラフ */}
-              <ResponsiveContainer width="100%" height={200}>
+              {/* 需給カーブ：グラフ */}
+              <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={chartData} margin={{ left:10, right:20, top:4, bottom:0 }}>
                   <XAxis dataKey="time" tick={{ fontSize:10 }}
                     interval={Math.max(1, Math.floor(chartData.length/6))} />
                   <YAxis
                     domain={[
                       Math.floor(Math.min(...scenarioData.map(d=>d.demand))*0.95/1000)*1000,
-                      Math.ceil(Math.max(...scenarioData.map(d=>d.demand))*1.05/1000)*1000
+                      Math.ceil(Math.max(...scenarioData.map(d=>d.demand))*1.05/1000)*1000,
                     ]}
                     tickFormatter={v=>`${Math.round(v/1000)}万`}
                     tick={{ fontSize:10 }}
                   />
                   <Tooltip
                     formatter={(v,n) => [`${v.toLocaleString()} MW`, n==="demand"?"需要（実績）":"供給（この構成）"]}
-                    labelFormatter={l => `時刻: ${l}`}
+                    labelFormatter={l=>`時刻: ${l}`}
                   />
-                  <Legend formatter={n => n==="demand"?"需要（実績）":"供給（この構成）"} />
+                  <Legend formatter={n=>n==="demand"?"需要（実績）":"供給（この構成）"} />
                   <ReferenceLine y={peakDemand} stroke="#E24B4A" strokeDasharray="3 3"
                     label={{ value:`ピーク ${(peakDemand/10000).toFixed(1)}万MW`, fontSize:10, fill:"#E24B4A", position:"insideTopRight" }} />
                   <Line type="monotone" dataKey="demand" stroke="#E24B4A" dot={false} strokeWidth={2} name="demand" />
@@ -680,8 +734,8 @@ export default function App() {
                 </LineChart>
               </ResponsiveContainer>
 
-              {/* 現在コマのデータ（グラフの下に表示） */}
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginTop:14 }}>
+              {/* 現在コマのデータ */}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginTop:12 }}>
                 <InfoCell label="時刻"   value={currentFrame.time} />
                 <InfoCell label="需要"   value={`${currentFrame.demand.toLocaleString()} MW`} />
                 <InfoCell label="供給"   value={`${currentFrame.supply.toLocaleString()} MW`} />
@@ -689,25 +743,23 @@ export default function App() {
                   color={currentFrame.reserve>=3?"#0ca30c":currentFrame.reserve>=0?"#ec835a":"#E24B4A"} />
               </div>
 
-              {/* 停電リスク時間帯サマリー */}
+              {/* 停電リスクサマリー */}
               {dangerTimes.length > 0 && (
-                <div style={{ marginTop:12, padding:"10px 14px", background:"#fff3f3",
+                <div style={{ marginTop:10, padding:"8px 14px", background:"#fff3f3",
                   borderRadius:6, fontSize:12, color:"#E24B4A", border:"0.5px solid #fcc" }}>
-                  🔴 停電リスク発生時間帯（予備率0%未満）：{dangerTimes.slice(0,8).join("・")}
+                  🔴 停電リスク：{dangerTimes.slice(0,8).join("・")}
                   {dangerTimes.length>8 && `…他${dangerTimes.length-8}コマ`}
                 </div>
               )}
               {dangerTimes.length === 0 && allFrames.length > 0 && (
-                <div style={{ marginTop:12, padding:"10px 14px", background:"#f0fff4",
+                <div style={{ marginTop:10, padding:"8px 14px", background:"#f0fff4",
                   borderRadius:6, fontSize:12, color:"#0ca30c", border:"0.5px solid #9ee" }}>
                   ✅ この電源構成なら1日を通じて需給が安定しています
                 </div>
               )}
 
-              <p style={{ fontSize:11, color:"#aaa", marginTop:10 }}>
-                {mode==="extreme"
-                  ? "出典：OCCTO エリア需給実績（2025年8月）"
-                  : "※季節代表日データ（推計値）"}
+              <p style={{ fontSize:11, color:"#aaa", marginTop:8 }}>
+                出典：OCCTO エリア需給実績（2025/4〜2026/3）
               </p>
             </>
           )}
