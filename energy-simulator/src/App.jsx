@@ -576,73 +576,6 @@ export default function App() {
       {/* ④ プリセット後のスペーサー */}
       <div style={{ marginBottom:20 }} />
 
-      {/* 未来予測モード：気温入力パネル */}
-      {mode === "predict" && (() => {
-        const tempVal   = parseFloat(predTemp) || 22;
-        const discomfort = Math.abs(tempVal - REGRESSION.comfort_temp);
-        const predDemand = Math.round(REGRESSION.slope * discomfort + REGRESSION.intercept);
-        const sf = SEASON_FACTORS[predSeason].solarFactor;
-        const wf = SEASON_FACTORS[predSeason].windFactor;
-        const pm = calcMetrics(mix, predDemand, sf, wf);
-
-        return (
-          <div style={{ marginBottom:24 }}>
-            {/* 入力エリア */}
-            <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:20,
-              background:"#f5f5f3", borderRadius:8, padding:"16px 20px" }}>
-              <div>
-                <div style={{ fontSize:12, color:"#888", marginBottom:6 }}>予想気温（℃）を入力</div>
-                <input
-                  type="number" min="-10" max="45" step="0.5"
-                  value={predTemp}
-                  onChange={e => setPredTemp(e.target.value)}
-                  style={{ fontSize:28, fontWeight:500, width:100, border:"none",
-                    borderBottom:"2px solid #1a1a1a", background:"transparent",
-                    outline:"none", textAlign:"center" }}
-                />
-                <span style={{ fontSize:16, marginLeft:4 }}>℃</span>
-              </div>
-              <div>
-                <div style={{ fontSize:12, color:"#888", marginBottom:6 }}>季節</div>
-                <div style={{ display:"flex", gap:6 }}>
-                  {Object.entries(SEASON_FACTORS).map(([k, v]) => (
-                    <button key={k} onClick={() => setPredSeason(k)}
-                      style={{ ...S.smallTag(predSeason===k), padding:"4px 10px" }}>
-                      {v.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div style={{ marginLeft:"auto", textAlign:"right" }}>
-                <div style={{ fontSize:12, color:"#888", marginBottom:4 }}>予測需要</div>
-                <div style={{ fontSize:28, fontWeight:500 }}>{predDemand.toLocaleString()}</div>
-                <div style={{ fontSize:12, color:"#888" }}>MW</div>
-              </div>
-            </div>
-
-            {/* 3指標 */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:16 }}>
-              <MetricCard label="予測CO2排出量" value={pm.co2} unit="t-CO2/h"
-                barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
-              <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
-                barColor="#eda100" barPct={Math.min((pm.cost/18)*100,100)} />
-              <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
-                <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>予測安定性</div>
-                <div style={{ fontSize:14, fontWeight:500, color:pm.stabilityColor }}>{pm.stabilityLabel}</div>
-                <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {pm.reserve}%</div>
-              </div>
-            </div>
-
-            {/* 注記 */}
-            <div style={{ fontSize:11, color:"#aaa", lineHeight:1.6 }}>
-              予測式：需要(MW) = 424 × |気温 − 22℃| + 28,391<br/>
-              出典：関東8地点気温×OCCTO需給実績（2025/4〜2026/3）による回帰分析<br/>
-              ※曜日・湿度・前日比などは考慮していないため誤差が生じます
-            </div>
-          </div>
-        );
-      })()}
-
       {/* メインエリア：スライダー + コンテンツ */}
       <div style={{ display:"flex", gap:28 }}>
 
@@ -672,6 +605,78 @@ export default function App() {
 
         {/* コンテンツエリア */}
         <div style={{ flex:1, minWidth:0 }}>
+
+          {/* ===== 未来予測モード ===== */}
+          {mode === "predict" && (() => {
+            const tempVal    = parseFloat(predTemp) || 22;
+            const discomfort = Math.abs(tempVal - REGRESSION.comfort_temp);
+            const predDemand = Math.round(REGRESSION.slope * discomfort + REGRESSION.intercept);
+            const sf = SEASON_FACTORS[predSeason].solarFactor;
+            const wf = SEASON_FACTORS[predSeason].windFactor;
+            const pm = calcMetrics(mix, predDemand, sf, wf);
+            return (
+              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+
+                {/* 気温入力 */}
+                <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr auto 1fr", alignItems:"center", gap:12, marginBottom:14 }}>
+                    {/* 気温入力 */}
+                    <div>
+                      <div style={{ fontSize:11, color:"#888", marginBottom:8 }}>予想気温を入力</div>
+                      <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
+                        <input
+                          type="number" min="-10" max="45" step="0.5"
+                          value={predTemp}
+                          onChange={e => setPredTemp(e.target.value)}
+                          style={{ fontSize:32, fontWeight:500, width:90, border:"none",
+                            borderBottom:"2px solid #1a1a1a", background:"transparent",
+                            outline:"none", textAlign:"center" }}
+                        />
+                        <span style={{ fontSize:18 }}>℃</span>
+                      </div>
+                    </div>
+                    {/* 矢印 */}
+                    <div style={{ fontSize:22, color:"#aaa" }}>→</div>
+                    {/* 予測需要 */}
+                    <div>
+                      <div style={{ fontSize:11, color:"#888", marginBottom:8 }}>予測需要</div>
+                      <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
+                        <span style={{ fontSize:32, fontWeight:500 }}>{predDemand.toLocaleString()}</span>
+                        <span style={{ fontSize:18, color:"#888" }}>MW</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>季節</div>
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                    {Object.entries(SEASON_FACTORS).map(([k, v]) => (
+                      <button key={k} onClick={() => setPredSeason(k)}
+                        style={{ ...S.smallTag(predSeason===k) }}>
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3指標（縦並び） */}
+                <MetricCard label="予測CO2排出量" value={pm.co2} unit="t-CO2/h"
+                  barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
+                <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
+                  barColor="#eda100" barPct={Math.min((pm.cost/18)*100,100)} />
+                <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                  <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>予測安定性</div>
+                  <div style={{ fontSize:15, fontWeight:500, color:pm.stabilityColor }}>{pm.stabilityLabel}</div>
+                  <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {pm.reserve}%</div>
+                </div>
+
+                {/* 注記 */}
+                <div style={{ fontSize:11, color:"#aaa", lineHeight:1.7 }}>
+                  予測式：需要 = 424 × |気温 − 22℃| + 28,391 MW<br/>
+                  出典：関東8地点気温 × OCCTO需給実績（2025/4〜2026/3）<br/>
+                  ※曜日・湿度・前日比などは考慮していないため誤差が生じます
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ===== 通常・夏・冬モード：3指標 + 需給カーブ同時表示 ===== */}
           {mode !== "predict" && (
