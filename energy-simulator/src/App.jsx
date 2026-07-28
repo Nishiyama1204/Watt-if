@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, Legend, ReferenceLine,
   BarChart, Bar, Cell,
 } from "recharts";
+import "./App.css";
 
 // ============================================================
 // 定数
@@ -27,10 +28,10 @@ const PRESETS = {
 
 // モード・シナリオ定義
 const MODES = {
-  normal:  { label:"通常モード",      desc:"春・梅雨・秋の代表日で需給を確認" },
-  summer:  { label:"夏・電力逼迫日",  desc:"記録的猛暑日の実データで検証" },
-  winter:  { label:"冬・電力逼迫日",  desc:"厳冬期の電力逼迫日の実データで検証" },
-  predict: { label:"未来予測",         desc:"気温を入力して需要と安定性を予測" },
+  normal:  { label:"🌤️ 通常モード",      desc:"春・梅雨・秋の代表日で需給を確認" },
+  summer:  { label:"🌡️ 夏・電力逼迫日",  desc:"記録的猛暑日の実データで検証" },
+  winter:  { label:"❄️ 冬・電力逼迫日",  desc:"厳冬期の電力逼迫日の実データで検証" },
+  predict: { label:"🔮 未来予測",         desc:"気温を入力して需要と安定性を予測" },
 };
 
 const SCENARIO_OPTIONS = {
@@ -554,10 +555,6 @@ export default function App() {
               }}>{v.label}</button>
             ))}
           </div>
-            {/* 追加：選択中モードの説明文 */}
-          <div style={{ fontSize:11, color:"#aaa", marginTop:8 }}>
-            {MODES[mode].desc}
-          </div>
         </div>
 
         {/* ② シナリオ（未来予測以外） */}
@@ -624,9 +621,14 @@ export default function App() {
                   <span style={{ fontSize:12, color:"#555", minWidth:38, textAlign:"right" }}>{pct.toFixed(1)}%</span>
                 </div>
                 <input type="range" min="0" max="100" step="1"
+                  className="mix-slider"
                   value={Math.round(mix[s.key] || 0)}
                   onChange={e => handleSlider(s.key, e.target.value)}
-                  style={{ width:"100%", accentColor:s.color }} />
+                  style={{
+                    width:"100%",
+                    color: s.color,
+                    background: `linear-gradient(to right, ${s.color} 0%, ${s.color} ${pct}%, #e5e5e2 ${pct}%, #e5e5e2 100%)`,
+                  }} />
               </div>
             );
           })}

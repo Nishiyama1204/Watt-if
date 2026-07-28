@@ -182,3 +182,51 @@
     border-right-color: var(--border);
   }
 }
+
+/* ============================================================
+   電源割合スライダー（.mix-slider）
+   ブラウザごとに未選択部分の色がバラバラになるのを防ぐため、
+   デフォルトの見た目をリセットし、トラック全体を
+   JSX側で指定するグラデーション背景で塗り分ける。
+   ============================================================ */
+.mix-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.mix-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent; /* インラインstyleのbackgroundを使う */
+}
+
+.mix-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: currentColor;
+  border: none;
+  margin-top: -6px; /* トラック(6px)に対してつまみ(18px)を中央揃え */
+  cursor: pointer;
+}
+
+.mix-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.mix-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: currentColor;
+  border: none;
+  cursor: pointer;
+}
