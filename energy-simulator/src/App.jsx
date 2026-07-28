@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip,
+  LineChart, Line, XAxis, YAxis,
   ResponsiveContainer, Legend, ReferenceLine,
   BarChart, Bar, Cell,
 } from "recharts";
@@ -510,7 +510,8 @@ export default function App() {
   }
 
   const currentFrame  = allFrames[frameIdx];
-  const chartData     = allFrames.slice(0, frameIdx + 1);
+  // 変更点①：グラフには常に24時間分のデータを表示する（再生の進行に合わせて絞り込まない）
+  const chartData      = allFrames;
   const dangerTimes   = allFrames.filter(f => f.reserve < 0).map(f => f.time);
 
   const S = { // style helpers
@@ -744,9 +745,20 @@ export default function App() {
                   style={{ flex:1, accentColor:"#555" }} />
               </div>
 
-              {/* 需給カーブ：グラフ */}
+              {/* 需給カーブ：グラフ（常に24時間分表示。クリックで時刻選択可能） */}
               <ResponsiveContainer width="100%" height={180}>
-                <LineChart data={chartData} margin={{ left:10, right:20, top:4, bottom:0 }}>
+                <LineChart
+                  data={chartData}
+                  margin={{ left:10, right:20, top:4, bottom:0 }}
+                  onClick={(state) => {
+                    // 変更点②：グラフ上のクリック位置から時刻を選択できるようにする
+                    if (state && state.activeTooltipIndex != null) {
+                      setPlaying(false);
+                      setFrameIdx(state.activeTooltipIndex);
+                    }
+                  }}
+                  style={{ cursor:"pointer" }}
+                >
                   <XAxis dataKey="time" tick={{ fontSize:10 }}
                     interval={Math.max(1, Math.floor(chartData.length/6))} />
                   <YAxis
@@ -757,13 +769,11 @@ export default function App() {
                     tickFormatter={v=>`${Math.round(v/1000)}万`}
                     tick={{ fontSize:10 }}
                   />
-                  <Tooltip
-                    formatter={(v,n) => [`${v.toLocaleString()} MW`, n==="demand"?"需要（実績）":"供給（この構成）"]}
-                    labelFormatter={l=>`時刻: ${l}`}
-                  />
                   <Legend formatter={n=>n==="demand"?"需要（実績）":"供給（この構成）"} />
                   <ReferenceLine y={peakDemand} stroke="#E24B4A" strokeDasharray="3 3"
                     label={{ value:`ピーク ${(peakDemand/10000).toFixed(1)}万MW`, fontSize:10, fill:"#E24B4A", position:"insideTopRight" }} />
+                  {/* 変更点③：選択中／再生中の時刻を縦線で示す */}
+                  <ReferenceLine x={currentFrame.time} stroke="#888" strokeDasharray="2 2" />
                   <Line type="monotone" dataKey="demand" stroke="#E24B4A" dot={false} strokeWidth={2} name="demand" />
                   <Line type="monotone" dataKey="supply" stroke="#1baf7a" dot={false} strokeWidth={2} name="supply" />
                 </LineChart>
