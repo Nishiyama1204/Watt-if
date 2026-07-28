@@ -621,7 +621,7 @@ export default function App() {
                 <input type="range" min="0" max="100" step="1"
                   value={Math.round(mix[s.key] || 0)}
                   onChange={e => handleSlider(s.key, e.target.value)}
-                  style={{ width:"100%", accentColor:"#1a1a1a" }} />
+                  style={{ width:"100%", accentColor:s.color }} />
               </div>
             );
           })}
@@ -675,7 +675,12 @@ export default function App() {
                   <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                     {Object.entries(SEASON_FACTORS).map(([k, v]) => (
                       <button key={k} onClick={() => setPredSeason(k)}
-                        style={{ ...S.smallTag(predSeason===k) }}>
+                        style={{
+                          padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
+                          background: predSeason===k ? "#1a1a1a" : "#e8e8e6",
+                          color: predSeason===k ? "#fff" : "#555",
+                          fontWeight: predSeason===k ? 500 : 400,
+                        }}>
                         {v.label}
                       </button>
                     ))}
