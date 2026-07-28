@@ -28,10 +28,10 @@ const PRESETS = {
 
 // モード・シナリオ定義
 const MODES = {
-  normal:  { label:"🌤️ 通常モード",      desc:"春・梅雨・秋の代表日で需給を確認" },
-  summer:  { label:"🌡️ 夏・電力逼迫日",  desc:"記録的猛暑日の実データで検証" },
-  winter:  { label:"❄️ 冬・電力逼迫日",  desc:"厳冬期の電力逼迫日の実データで検証" },
-  predict: { label:"🔮 未来予測",         desc:"気温を入力して需要と安定性を予測" },
+  normal:  { label:"通常モード",      desc:"春・梅雨・秋の代表日で需給を確認" },
+  summer:  { label:"夏・電力逼迫日",  desc:"記録的猛暑日の実データで検証" },
+  winter:  { label:"冬・電力逼迫日",  desc:"厳冬期の電力逼迫日の実データで検証" },
+  predict: { label:"未来予測",         desc:"気温を入力して需要と安定性を予測" },
 };
 
 const SCENARIO_OPTIONS = {
@@ -554,6 +554,9 @@ export default function App() {
                 fontWeight: mode===k ? 500 : 400,
               }}>{v.label}</button>
             ))}
+          </div>
+          <div style={{ fontSize:11, color:"#aaa", marginTop:8 }}>
+            {MODES[mode].desc}
           </div>
         </div>
 
