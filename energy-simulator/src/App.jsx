@@ -529,7 +529,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860, margin:"0 auto", color:"#1a1a1a" }}>
+    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860, margin:"0 auto", color:"#1a1a1a", width:"100%", boxSizing:"border-box" }}>
 
       {/* タイトル */}
       <h1 style={{ fontSize:20, fontWeight:500, marginBottom:4 }}>電源構成シミュレーター</h1>
@@ -538,7 +538,7 @@ export default function App() {
       </p>
 
       {/* 選択パネル */}
-      <div style={{ background:"#f5f5f3", borderRadius:10, padding:"16px 20px", marginBottom:24 }}>
+      <div style={{ background:"#f5f5f3", borderRadius:10, padding:"16px 20px", marginBottom:24, width:"100%", minWidth:0, boxSizing:"border-box", alignSelf:"stretch" }}>
 
         {/* ① モード */}
         <div style={{ marginBottom:14 }}>
