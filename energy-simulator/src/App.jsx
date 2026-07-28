@@ -534,8 +534,8 @@ export default function App() {
     <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860, margin:"0 auto", color:"#1a1a1a", width:"100%", boxSizing:"border-box" }}>
 
       {/* タイトル */}
-      <h1 style={{ fontSize:20, fontWeight:500, marginBottom:4 }}>電源構成シミュレーター</h1>
-      <p style={{ fontSize:13, color:"#888", marginBottom:20 }}>
+      <h1 style={{ fontSize:20, fontWeight:500, marginBottom:4, textAlign:"center" }}>電源構成シミュレーター</h1>
+      <p style={{ fontSize:13, color:"#888", marginBottom:20, textAlign:"center" }}>
         脱炭素と安定供給のトレードオフを実データで検証する
       </p>
 
