@@ -646,9 +646,9 @@ export default function App() {
                 <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr auto 1fr", alignItems:"center", gap:12, marginBottom:14 }}>
                     {/* 気温入力 */}
-                    <div>
+                    <div style={{ textAlign:"center" }}>
                       <div style={{ fontSize:11, color:"#888", marginBottom:8 }}>予想気温を入力</div>
-                      <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
+                      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"center", gap:4 }}>
                         <input
                           type="number" min="-10" max="45" step="0.5"
                           value={predTemp}
@@ -663,9 +663,9 @@ export default function App() {
                     {/* 矢印 */}
                     <div style={{ fontSize:22, color:"#aaa" }}>→</div>
                     {/* 予測需要 */}
-                    <div>
+                    <div style={{ textAlign:"center" }}>
                       <div style={{ fontSize:11, color:"#888", marginBottom:8 }}>予測需要</div>
-                      <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
+                      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"center", gap:4 }}>
                         <span style={{ fontSize:32, fontWeight:500 }}>{predDemand.toLocaleString()}</span>
                         <span style={{ fontSize:18, color:"#888" }}>MW</span>
                       </div>
