@@ -531,16 +531,16 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860, margin:"0 auto", color:"#1a1a1a", width:"100%", boxSizing:"border-box" }}>
+    <div style={{ padding:"1.5rem", fontFamily:"Noto Sans JP, sans-serif", background:"#FAFAF8", maxWidth:860, margin:"0 auto", color:"#1B3A5C", width:"100%", boxSizing:"border-box" }}>
 
       {/* タイトル */}
-      <h1 style={{ fontSize:20, fontWeight:500, marginBottom:4, textAlign:"center" }}>電源構成シミュレーター</h1>
-      <p style={{ fontSize:13, color:"#888", marginBottom:20, textAlign:"center" }}>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, letterSpacing:"-.02em", color:"#1B3A5C", textAlign:"center" }}>電源構成シミュレーター</h1>
+      <p style={{ fontSize:13, color:"#64748B", marginBottom:20, textAlign:"center" }}>
         脱炭素と安定供給のトレードオフを実データで検証する
       </p>
 
       {/* 選択パネル */}
-      <div style={{ background:"#f5f5f3", borderRadius:10, padding:"16px 20px", marginBottom:24, width:"100%", minWidth:0, boxSizing:"border-box", alignSelf:"stretch" }}>
+      <div style={{background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:10, padding:"16px 20px", marginBottom:24, width:"100%", minWidth:0, boxSizing:"border-box", alignSelf:"stretch" }}>
 
         {/* ① モード */}
         <div style={{ marginBottom:14 }}>
@@ -549,7 +549,7 @@ export default function App() {
             {Object.entries(MODES).map(([k, v]) => (
               <button key={k} onClick={() => handleMode(k)} style={{
                 padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
-                background: mode===k ? "#1a1a1a" : "#e8e8e6",
+                background: mode===k ? "#1a1a1a" : "#EDF2F7",
                 color: mode===k ? "#fff" : "#555",
                 fontWeight: mode===k ? 500 : 400,
               }}>{v.label}</button>
@@ -570,7 +570,7 @@ export default function App() {
                   onClick={() => { setScenario(sc.key); setPlaying(false); setFrameIdx(0); }}
                   style={{
                     padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
-                    background: scenarioKey===sc.key ? "#1a1a1a" : "#e8e8e6",
+                    background: scenarioKey===sc.key ? "#1a1a1a" : "#EDF2F7",
                     color: scenarioKey===sc.key ? "#fff" : "#555",
                     fontWeight: scenarioKey===sc.key ? 500 : 400,
                   }}>{sc.label}</button>
@@ -594,7 +594,7 @@ export default function App() {
             ].map(p => (
               <button key={p.key} onClick={() => applyPreset(p.key)} style={{
                 padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
-                background: activePreset===p.key ? "#1a1a1a" : "#e8e8e6",
+                background: activePreset===p.key ? "#1a1a1a" : "#EDF2F7",
                 color: activePreset===p.key ? "#fff" : "#555",
                 fontWeight: activePreset===p.key ? 500 : 400,
               }}>{p.label}</button>
@@ -652,7 +652,7 @@ export default function App() {
               <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
 
                 {/* 気温入力 */}
-                <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                <div style={{ background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:8, padding:"14px 16px" }}>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr auto 1fr", alignItems:"center", gap:12, marginBottom:14 }}>
                     {/* 気温入力 */}
                     <div style={{ textAlign:"center" }}>
@@ -686,7 +686,7 @@ export default function App() {
                       <button key={k} onClick={() => setPredSeason(k)}
                         style={{
                           padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
-                          background: predSeason===k ? "#1a1a1a" : "#e8e8e6",
+                          background: predSeason===k ? "#1a1a1a" : "#EDF2F7",
                           color: predSeason===k ? "#fff" : "#555",
                           fontWeight: predSeason===k ? 500 : 400,
                         }}>
@@ -702,7 +702,7 @@ export default function App() {
                     barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
                   <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
                     barColor="#eda100" barPct={Math.min((pm.cost/18)*100,100)} />
-                  <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                  <div style={{ background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:8, padding:"14px 16px" }}>
                     <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>予測安定性</div>
                     <div style={{ fontSize:14, fontWeight:500, color:pm.stabilityColor }}>{pm.stabilityLabel}</div>
                     <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {pm.reserve}%</div>
@@ -728,12 +728,15 @@ export default function App() {
                   barColor="#E24B4A" barPct={Math.min((snapMetrics.co2/35)*100,100)} />
                 <MetricCard label="発電コスト" value={snapMetrics.cost} unit="億円/h"
                   barColor="#eda100" barPct={Math.min((snapMetrics.cost/18)*100,100)} />
-                <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                <div style={{ background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:8, padding:"14px 16px" }}>
                   <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>ピーク時の安定性</div>
                   <div style={{ fontSize:14, fontWeight:500, color:snapMetrics.stabilityColor }}>
                     {snapMetrics.stabilityLabel}
                   </div>
                   <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {snapMetrics.reserve}%</div>
+                  <div style={{marginTop:10, height:8, borderRadius:999, background:"#E5E7EB", overflow:"hidden"}}>
+                  <div style={{ height:"100%", width:`${Math.max(0,Math.min(100,(snapMetrics.reserve+10)*5))}%`, background:snapMetrics.reserve>=8 ?"#22C55E" :snapMetrics.reserve>=3 ?"#F59E0B" :"#DC2626", transition:"all .4s"}}/>
+                  </div>
                 </div>
               </div>
 
@@ -826,7 +829,7 @@ export default function App() {
 
 function MetricCard({ label, value, unit, barColor, barPct }) {
   return (
-    <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+    <div style={{ background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:8, padding:"14px 16px" }}>
       <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>{label}</div>
       <div>
         <span style={{ fontSize:20, fontWeight:500 }}>{value}</span>
@@ -842,7 +845,7 @@ function MetricCard({ label, value, unit, barColor, barPct }) {
 
 function InfoCell({ label, value, color }) {
   return (
-    <div style={{ background:"#f5f5f3", borderRadius:6, padding:"8px 12px" }}>
+    <div style={{ background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:6, padding:"8px 12px" }}>
       <div style={{ fontSize:10, color:"#aaa", marginBottom:3 }}>{label}</div>
       <div style={{ fontSize:13, fontWeight:500, color: color || "#1a1a1a" }}>{value}</div>
     </div>
