@@ -621,7 +621,7 @@ export default function App() {
                 <input type="range" min="0" max="100" step="1"
                   value={Math.round(mix[s.key] || 0)}
                   onChange={e => handleSlider(s.key, e.target.value)}
-                  style={{ width:"100%", accentColor:s.color }} />
+                  style={{ width:"100%", accentColor:"#1a1a1a" }} />
               </div>
             );
           })}
