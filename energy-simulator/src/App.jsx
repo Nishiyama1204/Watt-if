@@ -693,23 +693,25 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 3指標（縦並び） */}
-                <MetricCard label="予測CO2排出量" value={pm.co2} unit="t-CO2/h"
-                  barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
-                <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
-                  barColor="#eda100" barPct={Math.min((pm.cost/18)*100,100)} />
-                <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
-                  <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>予測安定性</div>
-                  <div style={{ fontSize:15, fontWeight:500, color:pm.stabilityColor }}>{pm.stabilityLabel}</div>
-                  <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {pm.reserve}%</div>
+                {/* 3指標（横並び：通常モードと統一） */}
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
+                  <MetricCard label="予測CO2排出量" value={pm.co2} unit="t-CO2/h"
+                    barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
+                  <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
+                    barColor="#eda100" barPct={Math.min((pm.cost/18)*100,100)} />
+                  <div style={{ background:"#f5f5f3", borderRadius:8, padding:"14px 16px" }}>
+                    <div style={{ fontSize:11, color:"#888", marginBottom:6 }}>予測安定性</div>
+                    <div style={{ fontSize:14, fontWeight:500, color:pm.stabilityColor }}>{pm.stabilityLabel}</div>
+                    <div style={{ fontSize:11, color:"#888", marginTop:4 }}>予備率 {pm.reserve}%</div>
+                  </div>
                 </div>
 
                 {/* 注記 */}
-                <div style={{ fontSize:11, color:"#aaa", lineHeight:1.7 }}>
+                <p style={{ fontSize:11, color:"#aaa", lineHeight:1.7, marginTop:8 }}>
                   予測式：需要 = 424 × |気温 − 22℃| + 28,391 MW<br/>
                   出典：関東8地点気温 × OCCTO需給実績（2025/4〜2026/3）<br/>
                   ※曜日・湿度・前日比などは考慮していないため誤差が生じます
-                </div>
+                </p>
               </div>
             );
           })()}
