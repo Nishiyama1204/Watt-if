@@ -741,7 +741,7 @@ export default function App() {
                 </button>
                 <input type="range" min={0} max={scenarioData.length-1} value={frameIdx}
                   onChange={e => { setPlaying(false); setFrameIdx(parseInt(e.target.value)); }}
-                  style={{ flex:1 }} />
+                  style={{ flex:1, accentColor:"#555" }} />
               </div>
 
               {/* 需給カーブ：グラフ */}
