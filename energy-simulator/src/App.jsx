@@ -632,7 +632,6 @@ export default function App() {
               </div>
             );
           })}
-          <div style={{ fontSize:11, color:"#aaa", paddingTop:8, textAlign:"right" }}>合計 100%（自動調整）</div>
         </div>
 
         {/* コンテンツエリア */}
