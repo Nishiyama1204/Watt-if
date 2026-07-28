@@ -526,7 +526,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860, color:"#1a1a1a" }}>
+    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860,margin: "0 auto", color:"#1a1a1a" }}>
 
       {/* タイトル */}
       <h1 style={{ fontSize:20, fontWeight:500, marginBottom:4 }}>電源構成シミュレーター</h1>
@@ -600,7 +600,6 @@ export default function App() {
               </div>
             );
           })}
-          <div style={{ fontSize:11, color:"#aaa", paddingTop:8, textAlign:"right" }}>合計 100%（自動調整）</div>
         </div>
 
         {/* コンテンツエリア */}
