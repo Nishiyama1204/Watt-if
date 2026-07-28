@@ -496,12 +496,15 @@ export default function App() {
     setMix(newMix);
   }
 
+  const [activePreset, setActivePreset] = useState("current");
+
   function applyPreset(name) {
     const p = PRESETS[name];
     const sum = Object.values(p).reduce((a,b)=>a+b,0);
     const normalized = {};
     SOURCES.forEach(s => { normalized[s.key] = (p[s.key] / sum) * 100; });
     setMix(normalized);
+    setActivePreset(name);
     setPlaying(false);
     setFrameIdx(0);
   }
@@ -526,7 +529,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860,margin: "0 auto", color:"#1a1a1a" }}>
+    <div style={{ padding:"1.5rem", fontFamily:"sans-serif", maxWidth:860, margin:"0 auto", color:"#1a1a1a" }}>
 
       {/* タイトル */}
       <h1 style={{ fontSize:20, fontWeight:500, marginBottom:4 }}>電源構成シミュレーター</h1>
@@ -534,47 +537,69 @@ export default function App() {
         脱炭素と安定供給のトレードオフを実データで検証する
       </p>
 
-      {/* ① モード選択 */}
-      <div style={{ marginBottom:14 }}>
-        <span style={{ fontSize:12, color:"#888", marginRight:10 }}>モード</span>
-        {Object.entries(MODES).map(([k, v]) => (
-          <button key={k} onClick={() => handleMode(k)}
-            style={{ ...S.tag(mode===k), marginRight:8 }}>{v.label}</button>
-        ))}
-      </div>
+      {/* 選択パネル */}
+      <div style={{ background:"#f5f5f3", borderRadius:10, padding:"16px 20px", marginBottom:24 }}>
 
-      {/* ② シナリオ選択（未来予測モード以外） */}
-      {mode !== "predict" && (
+        {/* ① モード */}
         <div style={{ marginBottom:14 }}>
-          <span style={{ fontSize:12, color:"#888", marginRight:10 }}>シナリオ</span>
-          {SCENARIO_OPTIONS[mode].map(sc => (
-            <button key={sc.key} onClick={() => { setScenario(sc.key); setPlaying(false); setFrameIdx(0); }}
-              style={{ ...S.smallTag(scenarioKey===sc.key), marginRight:6, marginBottom:4 }}>
-              {sc.label}
-            </button>
-          ))}
-          <span style={{ fontSize:11, color:"#aaa", marginLeft:6 }}>
-            {SCENARIO_OPTIONS[mode].find(s=>s.key===scenarioKey)?.note}
-          </span>
+          <div style={{ fontSize:13, color:"#1a1a1a", fontWeight:400, marginBottom:8 }}>モード</div>
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+            {Object.entries(MODES).map(([k, v]) => (
+              <button key={k} onClick={() => handleMode(k)} style={{
+                padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
+                background: mode===k ? "#1a1a1a" : "#e8e8e6",
+                color: mode===k ? "#fff" : "#555",
+                fontWeight: mode===k ? 500 : 400,
+              }}>{v.label}</button>
+            ))}
+          </div>
         </div>
-      )}
 
-      {/* ③ プリセット */}
-      <div style={{ marginBottom:14 }}>
-        <span style={{ fontSize:12, color:"#888", marginRight:10 }}>電源構成</span>
-        {[
-          {key:"current",    label:"現状（2025）"},
-          {key:"target2030", label:"2030年目標"},
-          {key:"renew100",   label:"再エネ100%"},
-          {key:"nuclear",    label:"原子力増強"},
-        ].map(p => (
-          <button key={p.key} onClick={() => applyPreset(p.key)}
-            style={{ ...S.smallTag(false), marginRight:6 }}>{p.label}</button>
-        ))}
+        {/* ② シナリオ（未来予測以外） */}
+        {mode !== "predict" && (
+          <div style={{ marginBottom:14, paddingTop:14, borderTop:"0.5px solid #ddd" }}>
+            <div style={{ fontSize:13, color:"#1a1a1a", fontWeight:400, marginBottom:8 }}>シナリオ</div>
+            <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center" }}>
+              {SCENARIO_OPTIONS[mode].map(sc => (
+                <button key={sc.key}
+                  onClick={() => { setScenario(sc.key); setPlaying(false); setFrameIdx(0); }}
+                  style={{
+                    padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
+                    background: scenarioKey===sc.key ? "#1a1a1a" : "#e8e8e6",
+                    color: scenarioKey===sc.key ? "#fff" : "#555",
+                    fontWeight: scenarioKey===sc.key ? 500 : 400,
+                  }}>{sc.label}</button>
+              ))}
+              <span style={{ fontSize:11, color:"#aaa", marginLeft:4 }}>
+                {SCENARIO_OPTIONS[mode].find(s=>s.key===scenarioKey)?.note}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* ③ 電源構成プリセット */}
+        <div style={{ paddingTop:14, borderTop:"0.5px solid #ddd" }}>
+          <div style={{ fontSize:13, color:"#1a1a1a", fontWeight:400, marginBottom:8 }}>電源構成プリセット</div>
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+            {[
+              {key:"current",    label:"現状（2025）"},
+              {key:"target2030", label:"2030年目標"},
+              {key:"renew100",   label:"再エネ100%"},
+              {key:"nuclear",    label:"原子力増強"},
+            ].map(p => (
+              <button key={p.key} onClick={() => applyPreset(p.key)} style={{
+                padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
+                background: activePreset===p.key ? "#1a1a1a" : "#e8e8e6",
+                color: activePreset===p.key ? "#fff" : "#555",
+                fontWeight: activePreset===p.key ? 500 : 400,
+              }}>{p.label}</button>
+            ))}
+          </div>
+        </div>
+
       </div>
 
-      {/* ④ プリセット後のスペーサー */}
-      <div style={{ marginBottom:20 }} />
+      {/* スペーサー削除済み */}
 
       {/* メインエリア：スライダー + コンテンツ */}
       <div style={{ display:"flex", gap:28 }}>
@@ -600,6 +625,7 @@ export default function App() {
               </div>
             );
           })}
+          <div style={{ fontSize:11, color:"#aaa", paddingTop:8, textAlign:"right" }}>合計 100%（自動調整）</div>
         </div>
 
         {/* コンテンツエリア */}
