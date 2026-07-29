@@ -224,6 +224,7 @@ body {
   border-radius: 3px;
   outline: none;
   cursor: pointer;
+  background-color: transparent; /* Firefoxが要素自体に既定の背景/枠を描くのを防ぐ */
 }
 
 .mix-slider::-webkit-slider-runnable-track {
@@ -242,6 +243,17 @@ body {
   border: none;
   margin-top: -6px; /* トラック(6px)に対してつまみ(18px)を中央揃え */
   cursor: pointer;
+  box-shadow: none; /* Chromeがフォーカス時に付ける光彩(リング)を無効化 */
+}
+
+/* フォーカス時にブラウザ標準のリング/光彩が復活しないよう明示的に打ち消す */
+.mix-slider:focus,
+.mix-slider:focus-visible {
+  outline: none;
+}
+.mix-slider:focus::-webkit-slider-thumb,
+.mix-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: none;
 }
 
 .mix-slider::-moz-range-track {
@@ -257,4 +269,10 @@ body {
   background: currentColor;
   border: none;
   cursor: pointer;
+  box-shadow: none;
+}
+.mix-slider:focus::-moz-range-thumb,
+.mix-slider:focus-visible::-moz-range-thumb {
+  box-shadow: none;
+  outline: none;
 }

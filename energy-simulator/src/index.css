@@ -11,8 +11,8 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: 'Noto Sans JP', system-ui, sans-serif;
-  --heading: 'Noto Sans JP', system-ui, sans-serif;
+  --sans: 'Meiryo UI', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --heading: 'Meiryo UI', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -52,6 +52,16 @@
 
 body {
   margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }
 
 #root {

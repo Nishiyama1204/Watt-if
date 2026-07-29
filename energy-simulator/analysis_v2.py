@@ -99,21 +99,50 @@ merged = merged.dropna(subset=['関東平均気温', '需要'])
 
 print(f'\nマージ後: {len(merged)}件')
 
+# 曜日・休日フラグを追加
+merged['曜日'] = merged['datetime'].dt.dayofweek  # 0=月 〜 6=日
+merged['休日フラグ'] = (merged['曜日'] >= 5).astype(int)  # 土日=1
+
 # 単純線形相関（参考値）
-corr_tokyo = merged['東京'].corr(merged['需要'])
 corr_kanto = merged['関東平均気温'].corr(merged['需要'])
 print(f'\n[単純線形相関]')
-print(f'  東京単点 vs 需要:     {corr_tokyo:.3f}')
 print(f'  関東8地点平均 vs 需要: {corr_kanto:.3f}')
 print(f'  ※全年データはU字型（寒くても暑くても需要高）なので線形相関は低くなる')
 
-# 不快度（快適温度22℃からの乖離）で再計算
-# U字型を線形に変換する → |気温 - 22| が大きいほど需要が高い
+# 不快度（快適温度22℃からの乖離）
 COMFORT_TEMP = 22.0
 merged['不快度'] = (merged['関東平均気温'] - COMFORT_TEMP).abs()
-corr_discomfort = merged['不快度'].corr(merged['需要'])
-print(f'\n[不快度ベース相関（快適温度{COMFORT_TEMP}℃からの乖離）]')
-print(f'  不快度 vs 需要: {corr_discomfort:.3f}')
+
+# 平日・休日別の平均需要
+print(f'\n[平日・休日の平均需要]')
+print(merged.groupby('休日フラグ')['需要'].agg(['mean','max','count']).round(0))
+
+# 重回帰：不快度 + 休日フラグ
+import numpy as np
+X = np.column_stack([
+    merged['不快度'].values,
+    merged['休日フラグ'].values,
+    np.ones(len(merged))
+])
+Y = merged['需要'].values
+coeffs, _, _, _ = np.linalg.lstsq(X, Y, rcond=None)
+slope_discomfort, slope_holiday, intercept = coeffs
+
+Y_pred = X @ coeffs
+corr_multi = np.corrcoef(Y, Y_pred)[0,1]
+rmse = np.sqrt(np.mean((Y - Y_pred)**2))
+
+print(f'\n=== 重回帰結果（曜日込み）===')
+print(f'  需要(MW) = {slope_discomfort:.1f} × |気温-{COMFORT_TEMP}℃| + ({slope_holiday:.1f}) × 休日フラグ + {intercept:.0f}')
+print(f'  相関係数: {corr_multi:.3f}（曜日なしは0.333）')
+print(f'  RMSE:     {rmse:.0f} MW')
+print(f'\n[予測例]')
+examples = [(38,0,'夏38℃・平日'),(38,1,'夏38℃・休日'),
+            (0, 0,'冬0℃・平日'), (0, 1,'冬0℃・休日'),
+            (22,0,'22℃・平日'),  (22,1,'22℃・休日')]
+for temp, holiday, label in examples:
+    pred = slope_discomfort * abs(temp - COMFORT_TEMP) + slope_holiday * holiday + intercept
+    print(f'  {label}: {pred:,.0f} MW')
 
 # 気温帯別の平均需要
 merged['気温帯'] = pd.cut(
@@ -129,36 +158,26 @@ print('\n=== 気温帯別 平均需要（関東平均気温ベース）===')
 print(temp_demand.to_string(index=False))
 
 # ============================================================
-# STEP 4: 未来予測用の回帰式を計算
-# 説明変数：不快度（|気温 - 22℃|）
+# STEP 4: 未来予測用の回帰式（曜日込み重回帰）
+# 説明変数：不快度（|気温 - 22℃|）・休日フラグ（土日=1）
 # 目的変数：需要（MW）
 # ============================================================
 
-from numpy.polynomial import polynomial as P
-import numpy as np
-
-X = merged['不快度'].values
-Y = merged['需要'].values
-
-# 線形回帰（最小二乗法）
-coeffs = np.polyfit(X, Y, 1)  # coeffs[0]=傾き, coeffs[1]=切片
-slope, intercept = coeffs
-print(f'\n=== 未来予測用 回帰式 ===')
-print(f'  予測需要(MW) = {slope:.1f} × |気温 - {COMFORT_TEMP}℃| + {intercept:.0f}')
-print(f'  例：気温35℃の場合 → {slope*(35-COMFORT_TEMP)+intercept:,.0f} MW')
-print(f'  例：気温0℃の場合  → {slope*(COMFORT_TEMP-0)+intercept:,.0f} MW')
-print(f'  例：気温22℃の場合 → {slope*0+intercept:,.0f} MW（最低需要）')
-
 # 回帰係数をJSONで保存（Reactから使う用）
 regression = {
-    'slope': round(slope, 2),
-    'intercept': round(intercept, 0),
-    'comfort_temp': COMFORT_TEMP,
-    'corr_discomfort': round(corr_discomfort, 3),
+    'slope_discomfort': round(float(slope_discomfort), 1),
+    'slope_holiday':    round(float(slope_holiday), 1),
+    'intercept':        round(float(intercept), 0),
+    'comfort_temp':     COMFORT_TEMP,
+    'corr':             round(float(corr_multi), 3),
+    'rmse':             round(float(rmse), 0),
 }
 with open('output/regression.json', 'w') as f:
     json.dump(regression, f)
-print('\nregression.json 保存完了')
+print(f'\nregression.json 保存完了')
+print(f'  slope_discomfort: {regression["slope_discomfort"]}')
+print(f'  slope_holiday:    {regression["slope_holiday"]}')
+print(f'  intercept:        {regression["intercept"]}')
 
 # ============================================================
 # STEP 5: 季節別ピーク日の特定・シナリオJSON出力
