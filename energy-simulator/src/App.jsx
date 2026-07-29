@@ -531,11 +531,11 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding:"1.5rem", fontFamily:"Noto Sans JP, sans-serif", background:"#FAFAF8", maxWidth:860, margin:"0 auto", color:"#1B3A5C", width:"100%", boxSizing:"border-box" }}>
+    <div className="app-bg" style={{ padding:"1.5rem", fontFamily:"\"Meiryo UI\", \"Noto Serif JP\", \"Hiragino Mincho ProN\", \"Yu Mincho\", serif", maxWidth:860, margin:"0 auto", color:"#1B3A5C", width:"100%", boxSizing:"border-box" }}>
 
       {/* タイトル */}
-      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, letterSpacing:"-.02em", color:"#1B3A5C", textAlign:"center" }}>Watt if？</h1>
-      <p style={{ fontSize:13, color:"#64748B", marginBottom:20, textAlign:"center" }}>
+      <h1 style={{ fontSize:30, fontWeight:700, marginBottom:4, letterSpacing:"-.02em", color:"#1B3A5C", textAlign:"center" }}>Watt if？</h1>
+      <p style={{ fontSize:15, color:"#64748B", marginBottom:20, textAlign:"center" }}>
         脱炭素と安定供給のトレードオフを実データで検証する
       </p>
 
@@ -629,6 +629,12 @@ export default function App() {
                   onChange={e => handleSlider(s.key, e.target.value)}
                   style={{
                     width:"100%",
+                    height:6,
+                    borderRadius:3,
+                    outline:"none",
+                    cursor:"pointer",
+                    appearance:"none",
+                    WebkitAppearance:"none",
                     color: s.color,
                     background: `linear-gradient(to right, ${s.color} 0%, ${s.color} ${pct}%, #e5e5e2 ${pct}%, #e5e5e2 100%)`,
                   }} />
@@ -649,7 +655,7 @@ export default function App() {
             const wf = SEASON_FACTORS[predSeason].windFactor;
             const pm = calcMetrics(mix, predDemand, sf, wf);
             return (
-              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+              <div style={{ display:"flex", flexDirection:"column", gap:25 }}>
 
                 {/* 気温入力 */}
                 <div style={{ background:"#FFFFFF", border:"1px solid #E4E7EB", borderRadius:8, padding:"14px 16px" }}>
@@ -685,7 +691,7 @@ export default function App() {
                     {Object.entries(SEASON_FACTORS).map(([k, v]) => (
                       <button key={k} onClick={() => setPredSeason(k)}
                         style={{
-                          padding:"7px 16px", fontSize:13, borderRadius:6, cursor:"pointer", border:"none",
+                          padding:"7px 16px", fontSize:12, borderRadius:6, cursor:"pointer", border:"none",
                           background: predSeason===k ? "#1a1a1a" : "#EDF2F7",
                           color: predSeason===k ? "#fff" : "#555",
                           fontWeight: predSeason===k ? 500 : 400,
@@ -697,7 +703,7 @@ export default function App() {
                 </div>
 
                 {/* 3指標（横並び：通常モードと統一） */}
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:20, marginBottom:20 }}>
                   <MetricCard label="予測CO2排出量" value={pm.co2} unit="t-CO2/h"
                     barColor="#E24B4A" barPct={Math.min((pm.co2/35)*100,100)} />
                   <MetricCard label="予測発電コスト" value={pm.cost} unit="億円/h"
@@ -710,7 +716,7 @@ export default function App() {
                 </div>
 
                 {/* 注記 */}
-                <p style={{ fontSize:11, color:"#aaa", lineHeight:1.7, marginTop:8 }}>
+                <p style={{ fontSize:11, color:"#aaa", lineHeight:1.7, marginTop:8, textAlign:"center" }}>
                   予測式：需要 = 424 × |気温 − 22℃| + 28,391 MW<br/>
                   出典：関東8地点気温 × OCCTO需給実績（2025/4〜2026/3）<br/>
                   ※曜日・湿度・前日比などは考慮していないため誤差が生じます
@@ -723,7 +729,7 @@ export default function App() {
           {mode !== "predict" && (
             <>
               {/* 3指標カード */}
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:16 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:30, marginBottom:20 }}>
                 <MetricCard label="CO2排出量" value={snapMetrics.co2} unit="t-CO2/h"
                   barColor="#E24B4A" barPct={Math.min((snapMetrics.co2/35)*100,100)} />
                 <MetricCard label="発電コスト" value={snapMetrics.cost} unit="億円/h"
@@ -741,7 +747,7 @@ export default function App() {
               </div>
 
               {/* 需給カーブ：再生コントロール */}
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:30, marginBottom:20 }}>
                 <button onClick={() => { if(frameIdx>=scenarioData.length-1)setFrameIdx(0); setPlaying(true); }}
                   disabled={playing}
                   style={{ padding:"5px 14px", fontSize:12, borderRadius:6, border:"none",
@@ -782,7 +788,7 @@ export default function App() {
                     tickFormatter={v=>`${Math.round(v/1000)}万`}
                     tick={{ fontSize:10 }}
                   />
-                  <Legend formatter={n=>n==="demand"?"需要（実績）":"供給（この構成）"} />
+                  <Legend formatter={n=>n==="demand"?"需要（実績）":"供給（この構成）"} wrapperStyle={{ fontSize: 10 }} />
                   <ReferenceLine y={peakDemand} stroke="#E24B4A" strokeDasharray="3 3"
                     label={{ value:`ピーク ${(peakDemand/10000).toFixed(1)}万MW`, fontSize:10, fill:"#E24B4A", position:"insideTopRight" }} />
                   {/* 変更点③：選択中／再生中の時刻を縦線で示す */}
@@ -793,7 +799,7 @@ export default function App() {
               </ResponsiveContainer>
 
               {/* 現在コマのデータ */}
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginTop:12 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:30, marginTop:20 }}>
                 <InfoCell label="時刻"   value={currentFrame.time} />
                 <InfoCell label="需要"   value={`${currentFrame.demand.toLocaleString()} MW`} />
                 <InfoCell label="供給"   value={`${currentFrame.supply.toLocaleString()} MW`} />
@@ -801,22 +807,7 @@ export default function App() {
                   color={currentFrame.reserve>=3?"#0ca30c":currentFrame.reserve>=0?"#ec835a":"#E24B4A"} />
               </div>
 
-              {/* 停電リスクサマリー */}
-              {dangerTimes.length > 0 && (
-                <div style={{ marginTop:10, padding:"8px 14px", background:"#fff3f3",
-                  borderRadius:6, fontSize:12, color:"#E24B4A", border:"0.5px solid #fcc" }}>
-                  🔴 停電リスク：{dangerTimes.slice(0,8).join("・")}
-                  {dangerTimes.length>8 && `…他${dangerTimes.length-8}コマ`}
-                </div>
-              )}
-              {dangerTimes.length === 0 && allFrames.length > 0 && (
-                <div style={{ marginTop:10, padding:"8px 14px", background:"#f0fff4",
-                  borderRadius:6, fontSize:12, color:"#0ca30c", border:"0.5px solid #9ee" }}>
-                  ✅ この電源構成なら1日を通じて需給が安定しています
-                </div>
-              )}
-
-              <p style={{ fontSize:11, color:"#aaa", marginTop:8 }}>
+              <p style={{ fontSize:11, color:"#aaa", marginTop:8, textAlign:"center" }}>
                 出典：OCCTO エリア需給実績（2025/4〜2026/3）
               </p>
             </>

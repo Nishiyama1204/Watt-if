@@ -1,3 +1,31 @@
+/* ============================================================
+   ページ背景：ドット方眼で統一
+   html/body/#root に残っている既定のグラデーション背景
+   （上部がオレンジがかって見える原因）を上書きし、
+   .app-bg を持つコンテナ全体にドット方眼を敷く。
+   ============================================================ */
+html,
+body,
+#root {
+  background: #FAFAF7;
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-bg {
+  background-color: #FAFAF7;
+  background-image: radial-gradient(circle, #D9D6C9 1.4px, transparent 1.4px);
+  background-size: 30px 30px;
+  background-position: -14px -14px;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
