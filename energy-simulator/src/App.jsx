@@ -356,7 +356,7 @@ export default function App() {
   const dangerTimes  = allFrames.filter(f => f.reserve < 0).map(f => f.time);
 
   return (
-    <div className="app-bg" style={{ padding:"1.5rem", fontFamily:"\"Meiryo UI\", \"Noto Serif JP\", \"Hiragino Mincho ProN\", \"Yu Mincho\", serif", maxWidth:860, margin:"0 auto", color:"#1B3A5C", width:"100%", boxSizing:"border-box" }}>
+    <div className="app-bg" style={{ padding:"1.5rem", maxWidth:860, margin:"0 auto", color:"#1B3A5C", width:"100%", boxSizing:"border-box" }}>
 
       <h1 style={{ fontSize:30, fontWeight:700, marginBottom:4, letterSpacing:"-.02em", color:"#1B3A5C", textAlign:"center" }}>Watt if？</h1>
       <p style={{ fontSize:15, color:"#64748B", marginBottom:20, textAlign:"center" }}>
@@ -585,8 +585,8 @@ export default function App() {
                   ▶ 再生
                 </button>
                 <button onClick={() => { setPlaying(false); setFrameIdx(0); }}
-                  style={{ padding:"5px 12px", fontSize:12, borderRadius:6, border:"0.5px solid #ccc",
-                    background:"transparent", color:"#555", cursor:"pointer" }}>
+                  style={{ padding:"5px 12px", fontSize:12, borderRadius:6, border:"0.5px solid #ccc", background:"#fff",
+                    color:"#1a1a1a", cursor:"pointer" }}>
                   ↺ リセット
                 </button>
                 <input type="range" min={0} max={scenarioData.length-1} value={frameIdx}
@@ -613,7 +613,7 @@ export default function App() {
                     tickFormatter={v=>`${Math.round(v/1000)}万`}
                     tick={{ fontSize:10 }}
                   />
-                  <Legend formatter={n=>n==="demand"?"需要（実績）":"供給（この構成）"} wrapperStyle={{ fontSize:10 }} />
+                  <Legend formatter={n=>n==="demand"?"需要（実績）":"供給（この構成）"} wrapperStyle={{ fontSize:14 }} />
                   <ReferenceLine y={peakDemand} stroke="#E24B4A" strokeDasharray="3 3"
                     label={{ value:`ピーク ${(peakDemand/10000).toFixed(1)}万MW`, fontSize:10, fill:"#E24B4A", position:"insideTopRight" }} />
                   <ReferenceLine x={currentFrame.time} stroke="#888" strokeDasharray="2 2" />
