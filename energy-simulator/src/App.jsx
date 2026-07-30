@@ -433,7 +433,8 @@ export default function App() {
         <div style={{ width:260, flexShrink:0 }}>
           <div style={{ fontSize:12, color:"#888", marginBottom:8 }}>電源割合（合計 100%固定）</div>
           {SOURCES.map(s => {
-            const pct = Math.round((mix[s.key] || 0) / Object.values(mix).reduce((a,b)=>a+b,0) * 100 * 10) / 10;
+            // mix[s.key] の値を整数に統一して、つまみと背景の位置ズレを防止
+            const currentVal = Math.round(mix[s.key] || 0);
             return (
               <div key={s.key} style={{ padding:"8px 0", borderBottom:"0.5px solid #eee" }}>
                 <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
@@ -441,17 +442,18 @@ export default function App() {
                     <span style={{ width:9, height:9, borderRadius:"50%", background:s.color, flexShrink:0, display:"inline-block" }}/>
                     {s.label}
                   </span>
-                  <span style={{ fontSize:12, color:"#555", minWidth:38, textAlign:"right" }}>{pct.toFixed(1)}%</span>
+                  <span style={{ fontSize:12, color:"#555", minWidth:38, textAlign:"right" }}>{currentVal.toFixed(1)}%</span>
                 </div>
                 <input type="range" min="0" max="100" step="1"
                   className="mix-slider"
-                  value={Math.round(mix[s.key] || 0)}
+                  value={currentVal}
                   onChange={e => handleSlider(s.key, e.target.value)}
                   style={{
                     width:"100%", height:6, borderRadius:3, outline:"none",
                     cursor:"pointer", appearance:"none", WebkitAppearance:"none",
                     color: s.color,
-                    background: `linear-gradient(to right, ${s.color} 0%, ${s.color} ${pct}%, #e5e5e2 ${pct}%, #e5e5e2 100%)`,
+                    /* pct の代わりに currentVal を使用して描画を完全に一致させる */
+                    background: `linear-gradient(to right, ${s.color} 0%, ${s.color} ${currentVal}%, #e5e5e2 ${currentVal}%, #e5e5e2 100%)`,
                   }} />
               </div>
             );
