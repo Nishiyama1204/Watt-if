@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   LineChart, Line, XAxis, YAxis,
   ResponsiveContainer, Legend, ReferenceLine,
-  BarChart, Bar, Cell,
 } from "recharts";
 import "./App.css";
 
@@ -273,7 +272,6 @@ export default function App() {
   const [mode,        setMode]        = useState("normal");
   const [scenarioKey, setScenario]    = useState("spring");
   const [mix,         setMix]         = useState({ ...PRESETS.current });
-  const [view,        setView]        = useState("sim");
   const [playing,     setPlaying]     = useState(false);
   const [frameIdx,    setFrameIdx]    = useState(0);
   const [predTemp,    setPredTemp]    = useState("30");
