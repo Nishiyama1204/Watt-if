@@ -7,7 +7,7 @@
 html,
 body,
 #root {
-  background: #f5fefd;
+  background: #fafffe;
   margin: 0;
   min-height: 100%;
 }
@@ -20,7 +20,7 @@ body {
 }
 
 .app-bg {
-  background-color: #f5fefd;
+  background-color: #fafffe;
   background-image: radial-gradient(circle, #D9D6C9 1.4px, transparent 1.4px);
   background-size: 30px 30px;
   background-position: -14px -14px;
