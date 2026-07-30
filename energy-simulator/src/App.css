@@ -1,3 +1,31 @@
+/* ============================================================
+   ページ背景：ドット方眼で統一
+   html/body/#root に残っている既定のグラデーション背景
+   （上部がオレンジがかって見える原因）を上書きし、
+   .app-bg を持つコンテナ全体にドット方眼を敷く。
+   ============================================================ */
+html,
+body,
+#root {
+  background: #fafffe;
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-bg {
+  background-color: #fafffe;
+  background-image: radial-gradient(circle, #D9D6C9 1.4px, transparent 1.4px);
+  background-size: 30px 30px;
+  background-position: -14px -14px;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -61,7 +89,7 @@
   flex-direction: column;
   gap: 25px;
   place-content: center;
-  place-items: center;
+  place-items: stretch;
   flex-grow: 1;
 
   @media (max-width: 1024px) {
@@ -181,4 +209,70 @@
     right: 0;
     border-right-color: var(--border);
   }
+}
+
+/* ============================================================
+   電源割合スライダー（.mix-slider）
+   ブラウザごとに未選択部分の色がバラバラになるのを防ぐため、
+   デフォルトの見た目をリセットし、トラック全体を
+   JSX側で指定するグラデーション背景で塗り分ける。
+   ============================================================ */
+.mix-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  background-color: transparent; /* Firefoxが要素自体に既定の背景/枠を描くのを防ぐ */
+}
+
+.mix-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent; /* インラインstyleのbackgroundを使う */
+}
+
+.mix-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: currentColor;
+  border: none;
+  margin-top: -6px; /* トラック(6px)に対してつまみ(18px)を中央揃え */
+  cursor: pointer;
+  box-shadow: none; /* Chromeがフォーカス時に付ける光彩(リング)を無効化 */
+}
+
+/* フォーカス時にブラウザ標準のリング/光彩が復活しないよう明示的に打ち消す */
+.mix-slider:focus,
+.mix-slider:focus-visible {
+  outline: none;
+}
+.mix-slider:focus::-webkit-slider-thumb,
+.mix-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: none;
+}
+
+.mix-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.mix-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: currentColor;
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+}
+.mix-slider:focus::-moz-range-thumb,
+.mix-slider:focus-visible::-moz-range-thumb {
+  box-shadow: none;
+  outline: none;
 }
